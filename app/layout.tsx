@@ -15,15 +15,17 @@ export default function RootLayout({
     <html lang="en">
       <body className="flex flex-col min-h-screen">
 
-        <nav className="bg-white shadow-md px-6 py-4 flex items-center justify-between">
+        <nav className="bg-white shadow-md px-4 sm:px-6 py-3 flex items-center justify-between">
+  
+  
+         <h1 className="text-lg sm:text-xl font-bold text-blue-600 cursor-pointer transition duration-300 hover:text-blue-800 hover:scale-105">
+           Vi~Listem
+         </h1>
 
-          <h1 className="text-xl font-bold text-blue-600 cursor-pointer transition duration-300 hover:text-blue-800 hover:scale-105">
-           V~Listem
-          </h1>
-
-          <p className="text-blue-600 font-medium">
-           Accomplish your Goal in one place
-          </p>
+  
+         <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium">
+           Accomplish Your Goals in one Place
+         </p>
 
         </nav>
 

@@ -28,9 +28,9 @@ export default function NoteItem({
       exit={{ opacity: 0, scale: 0.9 }}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
-      className={`flex justify-between items-center p-3 rounded-xl shadow-sm ${note.color}`}
+      className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 p-3 rounded-xl shadow-sm ${note.color} break-words`}
     >
-      {/* LEFT SIDE */}
+  
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
@@ -47,7 +47,6 @@ export default function NoteItem({
         </span>
       </div>
 
-      {/* RIGHT SIDE */}
       <div className="flex gap-2">
         <button
           onClick={onEdit}

@@ -25,6 +25,7 @@ export default function Home() {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Load notes
   useEffect(() => {
     const saved = localStorage.getItem("notes");
 
@@ -43,6 +44,7 @@ export default function Home() {
     setLoading(false);
   }, []);
 
+  // Save notes
   useEffect(() => {
     localStorage.setItem("notes", JSON.stringify(notes));
   }, [notes]);
@@ -109,29 +111,33 @@ export default function Home() {
     setEditIndex(index);
   };
 
+  // Loading UI
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-gray-500 text-sm sm:text-base">Loading...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-2xl shadow-md w-full max-w-md">
+    <main className="min-h-screen bg-gray-100 flex items-center justify-center px-3 sm:px-4">
 
-        <h1 className="text-2xl font-bold text-center">
-           To Do List
+      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg">
+
+        {/* Header */}
+        <h1 className="text-xl sm:text-2xl font-bold text-center">
+          To Do List
         </h1>
 
-        <p className="text-center text-gray-400 text-sm mb-4">
+        <p className="text-center text-gray-400 text-xs sm:text-sm mb-4">
           Stay productive. Stay organized.
         </p>
 
-        <div className="flex gap-2 mb-4">
+        {/* Input Section */}
+        <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <input
-            className="flex-1 border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="flex-1 border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             onKeyDown={(e) => {
@@ -142,12 +148,13 @@ export default function Home() {
 
           <button
             onClick={addNote}
-            className="bg-blue-500 hover:bg-blue-600 active:scale-95 transition text-white px-5 rounded-xl font-medium"
+            className="bg-blue-500 hover:bg-blue-600 active:scale-95 transition text-white px-4 sm:px-5 py-2 rounded-xl font-medium text-sm sm:text-base w-full sm:w-auto"
           >
             {editIndex !== null ? "Update" : "Add"}
           </button>
         </div>
 
+        {/* Clear All */}
         {notes.length > 0 && (
           <button
             onClick={clearAllNotes}
@@ -157,6 +164,7 @@ export default function Home() {
           </button>
         )}
 
+        {/* Notes */}
         <ul className="space-y-2">
           <AnimatePresence>
             {notes.map((n, i) => (
@@ -171,11 +179,12 @@ export default function Home() {
           </AnimatePresence>
         </ul>
 
+        {/* Empty State */}
         {notes.length === 0 && (
-          <p className="text-center text-gray-400 mt-4">
+          <p className="text-center text-gray-400 mt-4 text-sm sm:text-base">
             No notes yet.
             <br />
-            Start adding tasks to stay organized 
+            Start adding tasks to stay organized 🚀
           </p>
         )}
 
