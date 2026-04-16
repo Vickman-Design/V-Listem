@@ -35,7 +35,7 @@ export default function Home() {
       const fixed = parsed.map((n: any) => ({
         text: n.text,
         completed: n.completed ?? false,
-        color: n.color ?? "bg-gray-100",
+        color: n.color ?? "bg-gray-200",
       }));
 
       setNotes(fixed);
@@ -115,29 +115,31 @@ export default function Home() {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500 text-sm sm:text-base">Loading...</p>
+        <p className="text-gray-700 text-sm sm:text-base">
+          Loading...
+        </p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 flex items-center justify-center px-3 sm:px-4">
+    <main className="min-h-screen bg-gray-100 text-gray-900 flex items-center justify-center px-3 sm:px-4">
 
-      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg">
+      <div className="bg-white text-gray-900 p-4 sm:p-6 rounded-2xl shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg">
 
         {/* Header */}
-        <h1 className="text-xl sm:text-2xl font-bold text-center">
+        <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-900">
           To Do List
         </h1>
 
-        <p className="text-center text-gray-400 text-xs sm:text-sm mb-4">
+        <p className="text-center text-gray-600 text-xs sm:text-sm mb-4">
           Stay productive. Stay organized.
         </p>
 
-        {/* Input Section */}
+        {/* Input */}
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <input
-            className="flex-1 border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
+            className="flex-1 border border-gray-300 text-gray-900 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             onKeyDown={(e) => {
@@ -158,7 +160,7 @@ export default function Home() {
         {notes.length > 0 && (
           <button
             onClick={clearAllNotes}
-            className="mb-3 text-sm text-red-500 hover:underline"
+            className="mb-3 text-sm text-red-600 hover:underline"
           >
             Clear all notes
           </button>
@@ -181,7 +183,7 @@ export default function Home() {
 
         {/* Empty State */}
         {notes.length === 0 && (
-          <p className="text-center text-gray-400 mt-4 text-sm sm:text-base">
+          <p className="text-center text-gray-600 mt-4 text-sm sm:text-base">
             No notes yet.
             <br />
             Start adding tasks to stay organized 🚀
