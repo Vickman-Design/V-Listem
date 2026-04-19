@@ -52,30 +52,47 @@ export default function Home() {
     localStorage.setItem("notes", JSON.stringify(notes));
   }, [notes]);
 
-  // 🔥 REMINDER ENGINE (SAFE + FIXED)
+  // ✅ FIXED REMINDER ENGINE (NO REACT ERROR)
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
 
-      setNotes((prev) => {
-        return prev.map((n) => {
-          if (n.reminder && !n.completed && now >= n.reminder) {
-            
-            // browser notification
-            if ("Notification" in window && Notification.permission === "granted") {
-              new Notification("⏰ Reminder", {
-                body: n.text,
-              });
-            }
+      let triggered: string[] = [];
 
-            toast.success(`⏰ ${n.text}`);
+      setNotes((prev) => {
+        let changed = false;
+
+        const updated = prev.map((n) => {
+          if (n.reminder && !n.completed && now >= n.reminder) {
+            changed = true;
+
+            // collect for side-effects later
+            triggered.push(n.text);
 
             return { ...n, reminder: undefined };
           }
 
           return n;
         });
+
+        return changed ? updated : prev;
       });
+
+      // ✅ SIDE EFFECTS OUTSIDE STATE UPDATE
+      if (triggered.length > 0) {
+        triggered.forEach((text) => {
+          if (
+            "Notification" in window &&
+            Notification.permission === "granted"
+          ) {
+            new Notification("⏰ Reminder", {
+              body: text,
+            });
+          }
+
+          toast.success(`⏰ Reminder: ${text}`);
+        });
+      }
     }, 5000);
 
     return () => clearInterval(interval);
@@ -178,7 +195,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center px-3 sm:px-4">
-
       <div className="bg-white text-gray-900 p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100 w-full max-w-sm sm:max-w-md md:max-w-lg">
 
         {/* HEADER */}
@@ -201,7 +217,6 @@ export default function Home() {
 
         {/* INPUT */}
         <div className="flex flex-col sm:flex-row gap-2 mb-3">
-
           <input
             className="flex-1 border border-gray-300 p-3 rounded-lg"
             value={note}
@@ -215,7 +230,6 @@ export default function Home() {
             onChange={(e) => setReminderTime(e.target.value)}
             className="border border-gray-300 p-2 rounded-lg text-sm"
           />
-
         </div>
 
         <button
