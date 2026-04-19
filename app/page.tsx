@@ -9,6 +9,7 @@ type Note = {
   text: string;
   completed: boolean;
   color: string;
+  reminder?: number;
 };
 
 const colors = [
@@ -24,6 +25,7 @@ export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reminderTime, setReminderTime] = useState("");
 
   // Load notes
   useEffect(() => {
@@ -36,6 +38,7 @@ export default function Home() {
         text: n.text,
         completed: n.completed ?? false,
         color: n.color ?? "bg-gray-200",
+        reminder: n.reminder ?? undefined,
       }));
 
       setNotes(fixed);
@@ -49,10 +52,39 @@ export default function Home() {
     localStorage.setItem("notes", JSON.stringify(notes));
   }, [notes]);
 
+  // 🔥 REMINDER ENGINE (SAFE + FIXED)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+
+      setNotes((prev) => {
+        return prev.map((n) => {
+          if (n.reminder && !n.completed && now >= n.reminder) {
+            
+            // browser notification
+            if ("Notification" in window && Notification.permission === "granted") {
+              new Notification("⏰ Reminder", {
+                body: n.text,
+              });
+            }
+
+            toast.success(`⏰ ${n.text}`);
+
+            return { ...n, reminder: undefined };
+          }
+
+          return n;
+        });
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const addNote = () => {
     const trimmed = note.trim();
 
-    if (trimmed === "") {
+    if (!trimmed) {
       toast.error("Note cannot be empty");
       return;
     }
@@ -62,11 +94,18 @@ export default function Home() {
       return;
     }
 
+    const reminderTimestamp = reminderTime
+      ? new Date(reminderTime).getTime()
+      : undefined;
+
     if (editIndex !== null) {
       const updated = [...notes];
       updated[editIndex].text = trimmed;
+      updated[editIndex].reminder = reminderTimestamp;
+
       setNotes(updated);
       setEditIndex(null);
+
       toast.success("Note updated!");
     } else {
       const randomColor =
@@ -74,13 +113,19 @@ export default function Home() {
 
       setNotes([
         ...notes,
-        { text: trimmed, completed: false, color: randomColor },
+        {
+          text: trimmed,
+          completed: false,
+          color: randomColor,
+          reminder: reminderTimestamp,
+        },
       ]);
 
       toast.success("Note added!");
     }
 
     setNote("");
+    setReminderTime("");
   };
 
   const deleteNote = (index: number) => {
@@ -111,52 +156,76 @@ export default function Home() {
     setEditIndex(index);
   };
 
-  // Loading UI
+  const enableNotifications = async () => {
+    if (!("Notification" in window)) return;
+
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+      toast.success("Notifications enabled 🔔");
+    } else {
+      toast.error("Permission denied");
+    }
+  };
+
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-700 text-sm sm:text-base">
-          Loading...
-        </p>
+      <main className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-700">Loading...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-100 text-gray-900 flex items-center justify-center px-3 sm:px-4">
+    <main className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center px-3 sm:px-4">
 
-      <div className="bg-white text-gray-900 p-4 sm:p-6 rounded-2xl shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg">
+      <div className="bg-white text-gray-900 p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100 w-full max-w-sm sm:max-w-md md:max-w-lg">
 
-        {/* Header */}
-        <h1 className="text-xl sm:text-2xl font-bold text-center text-gray-900">
-          To Do List
-        </h1>
-
-        <p className="text-center text-gray-600 text-xs sm:text-sm mb-4">
-          Stay productive. Stay organized.
-        </p>
-
-        {/* Input */}
-        <div className="flex flex-col sm:flex-row gap-2 mb-4">
-          <input
-            className="flex-1 border border-gray-300 text-gray-900 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm sm:text-base"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") addNote();
-            }}
-            placeholder="Write a note..."
-          />
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-xl sm:text-2xl font-bold">
+            To Do List
+          </h1>
 
           <button
-            onClick={addNote}
-            className="bg-blue-500 hover:bg-blue-600 active:scale-95 transition text-white px-4 sm:px-5 py-2 rounded-xl font-medium text-sm sm:text-base w-full sm:w-auto"
+            onClick={enableNotifications}
+            className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg"
           >
-            {editIndex !== null ? "Update" : "Add"}
+            Enable Notifications
           </button>
         </div>
 
-        {/* Clear All */}
+        <p className="text-center text-gray-700 text-xs sm:text-sm mb-4">
+          Stay productive. Stay organized.
+        </p>
+
+        {/* INPUT */}
+        <div className="flex flex-col sm:flex-row gap-2 mb-3">
+
+          <input
+            className="flex-1 border border-gray-300 p-3 rounded-lg"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Write a note..."
+          />
+
+          <input
+            type="datetime-local"
+            value={reminderTime}
+            onChange={(e) => setReminderTime(e.target.value)}
+            className="border border-gray-300 p-2 rounded-lg text-sm"
+          />
+
+        </div>
+
+        <button
+          onClick={addNote}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg mb-3"
+        >
+          {editIndex !== null ? "Update" : "Add"}
+        </button>
+
+        {/* CLEAR */}
         {notes.length > 0 && (
           <button
             onClick={clearAllNotes}
@@ -166,7 +235,7 @@ export default function Home() {
           </button>
         )}
 
-        {/* Notes */}
+        {/* NOTES */}
         <ul className="space-y-2">
           <AnimatePresence>
             {notes.map((n, i) => (
@@ -181,12 +250,10 @@ export default function Home() {
           </AnimatePresence>
         </ul>
 
-        {/* Empty State */}
+        {/* EMPTY STATE */}
         {notes.length === 0 && (
-          <p className="text-center text-gray-600 mt-4 text-sm sm:text-base">
-            No notes yet.
-            <br />
-            Start adding tasks to stay organized 🚀
+          <p className="text-center text-gray-700 mt-4 text-sm">
+            No notes yet. Start adding tasks to stay organized
           </p>
         )}
 
